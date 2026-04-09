@@ -1,22 +1,30 @@
-import { type Component, createSignal } from "solid-js";
+import type { Component, Accessor, Setter } from "solid-js";
 import { ToggleGroup } from "@kobalte/core/toggle-group";
 import { Zap, Truck } from "lucide-solid";
 
-const VehicleToggle: Component = () => {
-  const [value, setValue] = createSignal<string[]>(["e-rickshaw"]);
+export enum DataSource {
+  Erickshaw = "e-rickshaw",
+  ThreeWheeler = "three-wheeler",
+}
 
+interface VehicleToggleProps {
+  value: Accessor<DataSource[]>;
+  setValue: Setter<DataSource[]>;
+}
+
+const VehicleToggle: Component<VehicleToggleProps> = (props) => {
   return (
     <div class="flex flex-col gap-3 p-4">
       <label class="text-sm font-medium text-slate-700">Data Sources</label>
 
       <ToggleGroup
         multiple
-        value={value()}
-        onChange={setValue}
+        value={props.value()}
+        onChange={props.setValue}
         class="flex gap-2"
       >
         <ToggleGroup.Item
-          value="e-rickshaw"
+          value={DataSource.Erickshaw}
           class="flex items-center gap-2 px-4 py-2 text-sm font-medium border border-slate-300 rounded-md transition-all
                  hover:bg-slate-50 outline-none focus-visible:ring-2 focus-visible:ring-blue-500
                  data-[state=on]:bg-blue-50 data-[state=on]:border-blue-600 data-[state=on]:text-blue-700"
@@ -26,7 +34,7 @@ const VehicleToggle: Component = () => {
         </ToggleGroup.Item>
 
         <ToggleGroup.Item
-          value="three-wheeler"
+          value={DataSource.ThreeWheeler}
           class="flex items-center gap-2 px-4 py-2 text-sm font-medium border border-slate-300 rounded-md transition-all
                  hover:bg-slate-50 outline-none focus-visible:ring-2 focus-visible:ring-blue-500
                  data-[state=on]:bg-blue-50 data-[state=on]:border-blue-600 data-[state=on]:text-blue-700"
