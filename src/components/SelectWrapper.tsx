@@ -1,4 +1,5 @@
-import { Component, splitProps } from "solid-js";
+import type { Component, Accessor, Setter } from "solid-js";
+import { splitProps } from "solid-js";
 import { Select } from "@kobalte/core/select";
 import { Check, ChevronsUpDown } from "lucide-solid";
 
@@ -11,15 +12,24 @@ interface SelectWrapperProps {
   label: string;
   placeholder: string;
   options: SelectOption[];
+  value: Accessor<SelectOption>;
+  setValue: Setter<SelectOption>;
 }
 
 const SelectWrapper: Component<SelectWrapperProps> = (props) => {
   // Use splitProps to keep the rest of the Kobalte functionality intact if needed
   const [local] = splitProps(props, ["label", "placeholder", "options"]);
 
+  function handleChange(val: SelectOption | null) {
+    if (val) props.setValue(val);
+  }
+
   return (
     <div class="flex flex-col gap-2 w-full max-w-[240px]">
       <Select
+        required
+        value={props.value()}
+        onChange={handleChange}
         options={local.options}
         optionValue="id"
         optionTextValue="value"
