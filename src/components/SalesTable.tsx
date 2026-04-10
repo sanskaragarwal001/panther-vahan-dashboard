@@ -3,9 +3,19 @@ import { Tooltip } from "@kobalte/core/tooltip";
 import { Search } from "lucide-solid";
 
 export interface SalesRecord {
-  id: number;
+  sno: number;
   maker: string;
-  monthlyData: number[];
+  jan: number;
+  feb: number | undefined;
+  mar: number | undefined;
+  apr: number | undefined;
+  jun: number | undefined;
+  jul: number | undefined;
+  sep: number | undefined;
+  oct: number | undefined;
+  nov: number | undefined;
+  dec: number | undefined;
+  total: number;
 }
 
 interface SalesTableProps {
@@ -36,7 +46,7 @@ const SalesTable: Component<SalesTableProps> = (props) => {
     );
   });
 
-  const calculateTotal = (data: number[]) => data.reduce((a, b) => a + b, 0);
+  // const calculateTotal = (data: number[]) => data.reduce((a, b) => a + b, 0);
 
   return (
     <div class="bg-white max-w-[1440px] mx-auto rounded-xl shadow-sm border border-slate-200 overflow-hidden">
@@ -75,32 +85,38 @@ const SalesTable: Component<SalesTableProps> = (props) => {
           </thead>
           <tbody class="text-sm text-slate-700">
             <For each={filteredData()}>
-              {(row, index) => (
-                <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
-                  <td class="px-4 py-4 text-slate-400">{index() + 1}</td>
-                  <td class="px-4 py-4 font-medium">
-                    <Tooltip>
-                      <Tooltip.Trigger class="text-left max-w-[180px] truncate block hover:text-blue-600 transition-colors cursor-help">
-                        {row.maker}
-                      </Tooltip.Trigger>
-                      <Tooltip.Portal>
-                        <Tooltip.Content class="z-50 bg-slate-900 text-white px-3 py-1.5 text-xs rounded shadow-lg animate-in fade-in zoom-in-95 duration-100">
-                          <Tooltip.Arrow />
+              {(row, index) => {
+                return (
+                  <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
+                    <td class="px-4 py-4 text-slate-400">{index() + 1}</td>
+                    <td class="px-4 py-4 font-medium">
+                      <Tooltip>
+                        <Tooltip.Trigger class="text-left max-w-[180px] truncate block hover:text-blue-600 transition-colors cursor-help">
                           {row.maker}
-                        </Tooltip.Content>
-                      </Tooltip.Portal>
-                    </Tooltip>
-                  </td>
-                  <For each={row.monthlyData}>
-                    {(val) => (
-                      <td class="px-3 py-4 text-center tabular-nums">{val}</td>
-                    )}
-                  </For>
-                  <td class="px-4 py-4 text-right font-bold text-slate-900 tabular-nums">
-                    {calculateTotal(row.monthlyData)}
-                  </td>
-                </tr>
-              )}
+                        </Tooltip.Trigger>
+                        <Tooltip.Portal>
+                          <Tooltip.Content class="z-50 bg-slate-900 text-white px-3 py-1.5 text-xs rounded shadow-lg animate-in fade-in zoom-in-95 duration-100">
+                            <Tooltip.Arrow />
+                            {row.maker}
+                          </Tooltip.Content>
+                        </Tooltip.Portal>
+                      </Tooltip>
+                    </td>
+                    <For each={months}>
+                      {(month) => (
+                        <td class="px-3 py-4 text-center tabular-nums">
+                          {row[month.toLowerCase()]
+                            ? row[month.toLowerCase()]
+                            : 0}
+                        </td>
+                      )}
+                    </For>
+                    <td class="px-4 py-4 text-right font-bold text-slate-900 tabular-nums">
+                      {row.total}
+                    </td>
+                  </tr>
+                );
+              }}
             </For>
           </tbody>
         </table>
