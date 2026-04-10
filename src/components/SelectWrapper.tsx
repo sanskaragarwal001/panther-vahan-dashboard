@@ -12,8 +12,8 @@ interface SelectWrapperProps {
   label: string;
   placeholder: string;
   options: SelectOption[];
-  value: Accessor<SelectOption>;
-  setValue: Setter<SelectOption>;
+  value: Accessor<SelectOption | undefined>;
+  setValue: Setter<SelectOption | undefined>;
 }
 
 const SelectWrapper: Component<SelectWrapperProps> = (props) => {

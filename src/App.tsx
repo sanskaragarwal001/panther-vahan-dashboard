@@ -1,5 +1,5 @@
 import type { Component } from "solid-js";
-import { createSignal } from "solid-js";
+import { createSignal, createResource, createEffect } from "solid-js";
 import { Button } from "@kobalte/core/button";
 import { Search } from "lucide-solid";
 
@@ -7,21 +7,7 @@ import SelectWrapper, { type SelectOption } from "./components/SelectWrapper";
 import VehicleToggle, { DataSource } from "./components/VehicleToggle";
 import SalesTable from "./components/SalesTable";
 
-const states: SelectOption[] = [
-  { id: "j_idt35_1", value: "Uttar Pradesh" },
-  { id: "j_idt35_2", value: "Bihar" },
-  { id: "j_idt35_3", value: "Rajasthan" },
-  { id: "j_idt35_4", value: "Assam" },
-  { id: "j_idt35_5", value: "Uttrakhand" },
-];
-
-const rtos: SelectOption[] = [
-  { id: "selectedRto_1", value: "Meerut" },
-  { id: "selectedRto_2", value: "Rampur" },
-  { id: "selectedRto_3", value: "Patna" },
-  { id: "selectedRto_4", value: "Chapra" },
-  { id: "selectedRto_5", value: "Jaipur" },
-];
+import { fetchStates, fetchRtos } from "./resources";
 
 const years: SelectOption[] = [
   { id: "selectedYear_1", value: "2026" },
@@ -32,14 +18,41 @@ const years: SelectOption[] = [
 ];
 
 const App: Component = () => {
-  const [state, setState] = createSignal(states[0]);
-  const [rto, setRto] = createSignal(rtos[0]);
-  const [year, setYear] = createSignal(years[0]);
-  const [value, setValue] = createSignal<DataSource[]>([DataSource.Erickshaw]);
+  // 1. Signals for selections
+  const [selectedStateId, setSelectedStateId] = createSignal<
+    SelectOption | undefined
+  >(undefined);
+  const [selectedRtoId, setSelectedRtoId] = createSignal<
+    SelectOption | undefined
+  >(undefined);
+  const [selectedYearId, setSelectedYearId] = createSignal<
+    SelectOption | undefined
+  >(years[0]);
+  const [vehicleTypes, setVehicleTypes] = createSignal<DataSource[]>([
+    DataSource.Erickshaw,
+  ]);
+
+  // 2. Fetch States on mount
+  const [states] = createResource(fetchStates);
+
+  // 3. Dependent Resource: RTOs
+  // This resource will re-run whenever selectedStateId() changes.
+  const [rtos] = createResource(selectedStateId, fetchRtos);
+
+  // Optional: Reset RTO selection when State changes
+  createEffect(() => {
+    selectedStateId(); // track change
+    setSelectedRtoId(undefined); // clear RTO
+  });
 
   const handleSubmit = (e: Event) => {
     e.preventDefault();
-    console.log("Fetching vehicle data...", state(), rto(), year(), value());
+    console.log("Submitting:", {
+      state: selectedStateId(),
+      rto: selectedRtoId(),
+      year: selectedYearId(),
+      types: vehicleTypes(),
+    });
   };
 
   return (
@@ -61,25 +74,33 @@ const App: Component = () => {
             {/* Main Grid */}
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <SelectWrapper
-                options={states}
-                placeholder="Select a State"
+                options={states() || []}
+                placeholder={
+                  states.loading ? "Loading States..." : "Select a State"
+                }
                 label="STATE"
-                value={state}
-                setValue={setState}
+                value={selectedStateId}
+                setValue={setSelectedStateId}
               />
               <SelectWrapper
-                options={rtos}
-                placeholder="Select a RTO"
+                options={rtos() || []}
+                placeholder={
+                  !selectedStateId()
+                    ? "Select State First"
+                    : rtos.loading
+                      ? "Loading RTOs..."
+                      : "Select RTO"
+                }
                 label="RTO"
-                value={rto}
-                setValue={setRto}
+                value={selectedRtoId}
+                setValue={setSelectedRtoId}
               />
               <SelectWrapper
                 options={years}
                 placeholder="Select a Year"
                 label="YEAR"
-                value={year}
-                setValue={setYear}
+                value={selectedYearId}
+                setValue={setSelectedYearId}
               />
             </div>
 
@@ -90,7 +111,7 @@ const App: Component = () => {
               <h3 class="text-sm font-semibold text-slate-900 uppercase tracking-wider">
                 Vehicle Categories
               </h3>
-              <VehicleToggle value={value} setValue={setValue} />
+              <VehicleToggle value={vehicleTypes} setValue={setVehicleTypes} />
             </div>
 
             {/* Footer / Action Button */}
