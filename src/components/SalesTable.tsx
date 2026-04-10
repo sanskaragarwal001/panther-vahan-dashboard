@@ -2,30 +2,15 @@ import { Component, createSignal, createMemo, For } from "solid-js";
 import { Tooltip } from "@kobalte/core/tooltip";
 import { Search } from "lucide-solid";
 
-interface SalesRecord {
+export interface SalesRecord {
   id: number;
   maker: string;
   monthlyData: number[];
 }
 
-// Mock Data
-const MOCK_SALES: SalesRecord[] = [
-  {
-    id: 1,
-    maker: "Mahindra & Mahindra Last Mile Mobility Ltd.",
-    monthlyData: [450, 520, 610, 480, 500, 550, 600, 620, 580, 590, 610, 650],
-  },
-  {
-    id: 2,
-    maker: "Piaggio Vehicles Private Limited International",
-    monthlyData: [300, 310, 290, 350, 340, 320, 330, 350, 360, 370, 380, 400],
-  },
-  {
-    id: 3,
-    maker: "Saera Electric Auto Private Limited North Division",
-    monthlyData: [120, 150, 140, 130, 160, 170, 180, 190, 200, 210, 220, 230],
-  },
-];
+interface SalesTableProps {
+  records: SalesRecord[];
+}
 
 const months = [
   "Jan",
@@ -42,11 +27,11 @@ const months = [
   "Dec",
 ];
 
-const SalesTable: Component = () => {
+const SalesTable: Component<SalesTableProps> = (props) => {
   const [search, setSearch] = createSignal("");
 
   const filteredData = createMemo(() => {
-    return MOCK_SALES.filter((item) =>
+    return props.records.filter((item) =>
       item.maker.toLowerCase().includes(search().toLowerCase()),
     );
   });

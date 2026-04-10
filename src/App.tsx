@@ -1,13 +1,13 @@
 import type { Component } from "solid-js";
-import { createSignal, createResource, createEffect } from "solid-js";
+import { createSignal, createResource, createEffect, Show } from "solid-js";
 import { Button } from "@kobalte/core/button";
 import { Search } from "lucide-solid";
 
 import SelectWrapper, { type SelectOption } from "./components/SelectWrapper";
 import VehicleToggle, { DataSource } from "./components/VehicleToggle";
-import SalesTable from "./components/SalesTable";
+import SalesTable, { type SalesRecord } from "./components/SalesTable";
 
-import { fetchStates, fetchRtos } from "./resources";
+import { fetchStates, fetchRtos, fetchRecords } from "./resources";
 
 const years: SelectOption[] = [
   { id: "selectedYear_1", value: "2026" },
@@ -31,6 +31,12 @@ const App: Component = () => {
   const [vehicleTypes, setVehicleTypes] = createSignal<DataSource[]>([
     DataSource.Erickshaw,
   ]);
+  const [params, setParams] = createSignal<{
+    state: SelectOption;
+    rto: SelectOption;
+    year: SelectOption;
+    types: DataSource[];
+  } | null>(null);
 
   // 2. Fetch States on mount
   const [states] = createResource(fetchStates);
@@ -38,6 +44,7 @@ const App: Component = () => {
   // 3. Dependent Resource: RTOs
   // This resource will re-run whenever selectedStateId() changes.
   const [rtos] = createResource(selectedStateId, fetchRtos);
+  const [records] = createResource(params, fetchRecords);
 
   // Optional: Reset RTO selection when State changes
   createEffect(() => {
@@ -47,10 +54,33 @@ const App: Component = () => {
 
   const handleSubmit = (e: Event) => {
     e.preventDefault();
-    console.log("Submitting:", {
-      state: selectedStateId(),
-      rto: selectedRtoId(),
-      year: selectedYearId(),
+    if (!selectedStateId()) {
+      console.error(selectedStateId(), "state, not found");
+      return;
+    }
+    if (!selectedRtoId()) {
+      console.error(selectedRtoId(), "rto, not found");
+      return;
+    }
+    if (!selectedYearId()) {
+      console.error(selectedYearId(), "year, not found");
+      return;
+    }
+    if (vehicleTypes().length <= 0) {
+      console.error("data source not found.");
+      return;
+    }
+
+    console.table({
+      state: selectedStateId()!,
+      rto: selectedRtoId()!,
+      year: selectedYearId()!,
+      types: vehicleTypes(),
+    });
+    setParams({
+      state: selectedStateId()!,
+      rto: selectedRtoId()!,
+      year: selectedYearId()!,
       types: vehicleTypes(),
     });
   };
@@ -127,7 +157,9 @@ const App: Component = () => {
           </form>
         </div>
       </div>
-      <SalesTable />
+      <Show when={!records.loading}>
+        <SalesTable records={records() || []} />
+      </Show>
     </main>
   );
 };
