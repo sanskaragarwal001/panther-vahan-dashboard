@@ -8,7 +8,14 @@ import {
   Match,
 } from "solid-js";
 import { Tooltip } from "@kobalte/core/tooltip";
-import { Search, ChevronDown, ChevronUp } from "lucide-solid";
+import { Pagination } from "@kobalte/core/pagination";
+import {
+  Search,
+  ChevronDown,
+  ChevronUp,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-solid";
 
 export interface SalesRecord {
   sno: number;
@@ -46,7 +53,10 @@ const months = [
 ];
 
 const SalesTable: Component<SalesTableProps> = (props) => {
+  const pageSize = 15;
+
   const [search, setSearch] = createSignal("");
+  const [page, setPage] = createSignal(1);
   const [sortConfig, setSortConfig] = createSignal<{
     key: keyof SalesRecord;
     direction: "asc" | "desc";
@@ -55,10 +65,11 @@ const SalesTable: Component<SalesTableProps> = (props) => {
   const handleSort = (key: keyof SalesRecord) => {
     const lowerKey = key.toLowerCase();
     setSortConfig({ key: lowerKey, direction: "desc" });
+    setPage(1);
   };
 
   // Combined Memo for Search + Sort
-  const processedData = createMemo(() => {
+  const allProcessedData = createMemo(() => {
     // 1. Filter
     const filtered = props.records.filter((item) =>
       item.maker.toLowerCase().includes(search().toLowerCase()),
@@ -73,6 +84,17 @@ const SalesTable: Component<SalesTableProps> = (props) => {
       return config.direction === "asc" ? aValue - bValue : bValue - aValue;
     });
   });
+
+  // 3. Pagination Logic (Sliced Dataset)
+  const paginationData = createMemo(() => {
+    const start = (page() - 1) * pageSize;
+
+    return allProcessedData().slice(start, start + pageSize);
+  });
+
+  const totalPages = createMemo(() =>
+    Math.ceil(allProcessedData().length / pageSize),
+  );
 
   return (
     <div class="bg-white max-w-[1440px] mx-auto rounded-xl shadow-sm border border-slate-200 overflow-hidden">
@@ -130,10 +152,12 @@ const SalesTable: Component<SalesTableProps> = (props) => {
             </tr>
           </thead>
           <tbody class="text-sm text-slate-700">
-            <For each={processedData()}>
+            <For each={paginationData()}>
               {(row, index) => (
                 <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
-                  <td class="px-4 py-4 text-slate-400">{index() + 1}</td>
+                  <td class="px-4 py-4 text-slate-400">
+                    {(page() - 1) * pageSize + index() + 1}
+                  </td>
                   <td class="px-4 py-4 font-medium">
                     <Tooltip>
                       <Tooltip.Trigger class="text-left max-w-[180px] truncate block hover:text-blue-600 transition-colors cursor-help">
@@ -162,6 +186,34 @@ const SalesTable: Component<SalesTableProps> = (props) => {
             </For>
           </tbody>
         </table>
+      </div>
+
+      {/* Pagination Footer */}
+      <div class="p-4 border-t border-slate-100 flex justify-center bg-slate-50/50">
+        <Pagination
+          count={totalPages()}
+          page={page()}
+          onPageChange={setPage}
+          itemComponent={(props) => (
+            <Pagination.Item
+              page={props.page}
+              class="px-3 py-1 text-sm rounded-md border border-slate-200 bg-white hover:bg-slate-50 data-[current]:bg-blue-600 data-[current]:text-white data-[current]:border-blue-600 transition-colors"
+            >
+              {props.page}
+            </Pagination.Item>
+          )}
+          ellipsisComponent={() => <span class="px-2 text-slate-400">...</span>}
+        >
+          <div class="flex items-center gap-2">
+            <Pagination.Previous class="p-2 rounded-md border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed">
+              <ChevronLeft size={16} />
+            </Pagination.Previous>
+            <Pagination.Items />
+            <Pagination.Next class="p-2 rounded-md border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed">
+              <ChevronRight size={16} />
+            </Pagination.Next>
+          </div>
+        </Pagination>
       </div>
     </div>
   );
