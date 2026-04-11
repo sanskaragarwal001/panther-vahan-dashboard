@@ -52,7 +52,7 @@ const SelectWrapper: Component<SelectWrapperProps> = (props) => {
 
         <Select.Trigger class="flex items-center justify-between w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-md shadow-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
           <Select.Value<SelectOption>>
-            {(state) => state.selectedOption().value}
+            {(state) => state.selectedOption()?.value || local.placeholder}
           </Select.Value>
           <Select.Icon class="flex items-center">
             <ChevronsUpDown size={16} class="text-slate-400" />

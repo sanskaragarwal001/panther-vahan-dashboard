@@ -1,5 +1,13 @@
 import type { Component } from "solid-js";
-import { createSignal, createResource, createEffect, Show } from "solid-js";
+import {
+  createSignal,
+  createResource,
+  Show,
+  createEffect,
+  on,
+  batch,
+  createMemo,
+} from "solid-js";
 import { Button } from "@kobalte/core/button";
 import { Search } from "lucide-solid";
 
@@ -46,11 +54,18 @@ const App: Component = () => {
   const [rtos] = createResource(selectedStateId, fetchRtos);
   const [records] = createResource(params, fetchRecords);
 
-  // Optional: Reset RTO selection when State changes
-  createEffect(() => {
-    selectedStateId(); // track change
-    setSelectedRtoId(undefined); // clear RTO
+  const rtoOptions = createMemo(() => {
+    if (rtos.loading) return [];
+    return rtos() || [];
   });
+
+  createEffect(
+    on(selectedStateId, () => {
+      batch(() => {
+        setSelectedRtoId(undefined);
+      });
+    }),
+  );
 
   const handleSubmit = (e: Event) => {
     e.preventDefault();
@@ -113,14 +128,8 @@ const App: Component = () => {
                 setValue={setSelectedStateId}
               />
               <SelectWrapper
-                options={rtos() || []}
-                placeholder={
-                  !selectedStateId()
-                    ? "Select State First"
-                    : rtos.loading
-                      ? "Loading RTOs..."
-                      : "Select RTO"
-                }
+                options={rtoOptions()}
+                placeholder={rtos.loading ? "Loading RTOs..." : "Select RTO"}
                 label="RTO"
                 value={selectedRtoId}
                 setValue={setSelectedRtoId}
