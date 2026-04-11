@@ -23,6 +23,7 @@
     "@kobalte/core": "^0.13.11",
     "lucide-solid": "^1.8.0",
     "solid-charts": "^0.0.2",
-    "solid-js": "^1.9.9"
+    "solid-js": "^1.9.9",
+    "write-excel-file": "^3.0.8"
   }
 }
