@@ -68,32 +68,29 @@ const SalesTable: Component<SalesTableProps> = (props) => {
     setPage(1);
   };
 
-  // Combined Memo for Search + Sort
-  const allProcessedData = createMemo(() => {
-    // 1. Filter
-    const filtered = props.records.filter((item) =>
-      item.maker.toLowerCase().includes(search().toLowerCase()),
-    );
-
-    // 2. Sort
+  const sortedFullData = createMemo(() => {
     const config = sortConfig();
-    return [...filtered].sort((a, b) => {
-      const aValue = (a[config.key as keyof SalesRecord] as number) || 0;
-      const bValue = (b[config.key as keyof SalesRecord] as number) || 0;
-
+    return [...props.records].sort((a, b) => {
+      const aValue = (a[config.key] as number) || 0;
+      const bValue = (b[config.key] as number) || 0;
       return config.direction === "asc" ? aValue - bValue : bValue - aValue;
     });
+  });
+
+  const filteredData = createMemo(() => {
+    return sortedFullData().filter((item) =>
+      item.maker.toLowerCase().includes(search().toLowerCase()),
+    );
   });
 
   // 3. Pagination Logic (Sliced Dataset)
   const paginationData = createMemo(() => {
     const start = (page() - 1) * pageSize;
-
-    return allProcessedData().slice(start, start + pageSize);
+    return filteredData().slice(start, start + pageSize);
   });
 
   const totalPages = createMemo(() =>
-    Math.ceil(allProcessedData().length / pageSize),
+    Math.ceil(filteredData().length / pageSize),
   );
 
   return (
@@ -153,36 +150,40 @@ const SalesTable: Component<SalesTableProps> = (props) => {
           </thead>
           <tbody class="text-sm text-slate-700">
             <For each={paginationData()}>
-              {(row, index) => (
-                <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
-                  <td class="px-4 py-4 text-slate-400">
-                    {(page() - 1) * pageSize + index() + 1}
-                  </td>
-                  <td class="px-4 py-4 font-medium">
-                    <Tooltip>
-                      <Tooltip.Trigger class="text-left max-w-[180px] truncate block hover:text-blue-600 transition-colors cursor-help">
-                        {row.maker}
-                      </Tooltip.Trigger>
-                      <Tooltip.Portal>
-                        <Tooltip.Content class="z-50 bg-slate-900 text-white px-3 py-1.5 text-xs rounded shadow-lg">
-                          <Tooltip.Arrow />
+              {(row) => {
+                const currentSNo = createMemo(
+                  () => sortedFullData().indexOf(row) + 1,
+                );
+
+                return (
+                  <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
+                    <td class="px-4 py-4 text-slate-400">{currentSNo()}</td>
+                    <td class="px-4 py-4 font-medium">
+                      <Tooltip>
+                        <Tooltip.Trigger class="text-left max-w-[180px] truncate block hover:text-blue-600 transition-colors cursor-help">
                           {row.maker}
-                        </Tooltip.Content>
-                      </Tooltip.Portal>
-                    </Tooltip>
-                  </td>
-                  <For each={months}>
-                    {(month) => (
-                      <td class="px-3 py-4 text-center tabular-nums">
-                        {row[month.toLowerCase() as keyof SalesRecord] || 0}
-                      </td>
-                    )}
-                  </For>
-                  <td class="px-4 py-4 text-right font-bold text-slate-900 tabular-nums">
-                    {row.total}
-                  </td>
-                </tr>
-              )}
+                        </Tooltip.Trigger>
+                        <Tooltip.Portal>
+                          <Tooltip.Content class="z-50 bg-slate-900 text-white px-3 py-1.5 text-xs rounded shadow-lg">
+                            <Tooltip.Arrow />
+                            {row.maker}
+                          </Tooltip.Content>
+                        </Tooltip.Portal>
+                      </Tooltip>
+                    </td>
+                    <For each={months}>
+                      {(month) => (
+                        <td class="px-3 py-4 text-center tabular-nums">
+                          {row[month.toLowerCase() as keyof SalesRecord] || 0}
+                        </td>
+                      )}
+                    </For>
+                    <td class="px-4 py-4 text-right font-bold text-slate-900 tabular-nums">
+                      {row.total}
+                    </td>
+                  </tr>
+                );
+              }}
             </For>
           </tbody>
         </table>
