@@ -16,6 +16,7 @@ import { Search } from "lucide-solid";
 import SelectWrapper, { type SelectOption } from "./components/SelectWrapper";
 import VehicleToggle, { DataSource } from "./components/VehicleToggle";
 import SalesTable from "./components/SalesTable";
+import DownloadSalesDialog from "./components/Download";
 import { showToast } from "./components/Toast";
 
 import { fetchStates, fetchRtos, fetchRecords } from "./resources";
@@ -219,7 +220,7 @@ const App: Component = () => {
             </div>
 
             {/* Footer / Action Button */}
-            <div class="pt-4 flex justify-end">
+            <div class="pt-4 flex gap-5 justify-end">
               <Button
                 type="submit"
                 class="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-md shadow-blue-200 transition-all active:scale-95 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
@@ -227,6 +228,7 @@ const App: Component = () => {
                 <Search size={18} />
                 Fetch Records
               </Button>
+              <DownloadSalesDialog data={recordOptions()} />
             </div>
           </form>
         </div>
