@@ -58,8 +58,18 @@ const App: Component = () => {
   const [records] = createResource(params, fetchRecords);
 
   const rtoOptions = createMemo(() => {
-    if (rtos.loading) return [];
-    return rtos() || [];
+    if (rtos.loading || rtos.error) return [];
+    return Array.isArray(rtos.latest) ? rtos.latest : [];
+  });
+
+  const stateOptions = createMemo(() => {
+    if (states.loading || states.error) return [];
+    return Array.isArray(states.latest) ? states.latest : [];
+  });
+
+  const recordOptions = createMemo(() => {
+    if (records.loading || records.error) return [];
+    return Array.isArray(records.latest) ? records.latest : [];
   });
 
   createEffect(
@@ -71,12 +81,12 @@ const App: Component = () => {
   );
 
   // Success/Error monitoring for RTOs
-  // 1. Monitor States (Initial Load Only)
+  // 1. Monitor States Error
   createEffect(() => {
     if (states.error) {
       showToast({
-        title: "Error",
-        description: "Failed to fetch states.",
+        title: "State Fetch Failed",
+        description: "Could not load the list of states.",
         variant: "error",
       });
     }
@@ -87,14 +97,14 @@ const App: Component = () => {
     on(
       () => rtos.state,
       (state) => {
-        if (rtos.error) {
+        if (state === "errored") {
           showToast({
-            title: "Error",
+            title: "RTO Error",
             description: "Failed to fetch RTO locations.",
             variant: "error",
           });
         }
-        if (state === "ready" && Array.isArray(rtos())) {
+        if (state === "ready") {
           showToast({
             title: "RTOs Updated",
             description: "Regional data is ready.",
@@ -110,16 +120,16 @@ const App: Component = () => {
     on(
       () => records.state,
       (state) => {
-        if (records.error) {
+        if (state === "errored") {
           showToast({
-            title: "Error",
+            title: "Search Error",
             description: "Failed to fetch sales records.",
             variant: "error",
           });
         }
-        if (state === "ready" && Array.isArray(records())) {
+        if (state === "ready") {
           showToast({
-            title: "Sales Data Retrieved",
+            title: "Success",
             description: "Sales data fetched successfully.",
             variant: "success",
           });
@@ -174,7 +184,7 @@ const App: Component = () => {
             {/* Main Grid */}
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <SelectWrapper
-                options={states() || []}
+                options={stateOptions()}
                 placeholder={
                   states.loading ? "Loading States..." : "Select a State"
                 }
@@ -221,8 +231,8 @@ const App: Component = () => {
           </form>
         </div>
       </div>
-      <Show when={!records.loading}>
-        <SalesTable records={records() || []} />
+      <Show when={!records.loading && !records.error}>
+        <SalesTable records={recordOptions()} />
       </Show>
 
       <Portal>
