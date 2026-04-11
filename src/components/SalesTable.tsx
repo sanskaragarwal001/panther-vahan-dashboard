@@ -17,6 +17,8 @@ import {
   ChevronRight,
 } from "lucide-solid";
 
+import SalesBarChart from "./SalesChart";
+
 export interface SalesRecord {
   sno: number;
   maker: string;
@@ -95,6 +97,12 @@ const SalesTable: Component<SalesTableProps> = (props) => {
 
   return (
     <div class="bg-white max-w-[1440px] mx-auto rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <Show when={sortedFullData().length}>
+        <SalesBarChart
+          records={sortedFullData()}
+          activeMonth={sortConfig().key}
+        />
+      </Show>
       <div class="p-4 border-b border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
         <h2 class="text-lg font-semibold text-slate-800">
           Maker-wise Sales Report
