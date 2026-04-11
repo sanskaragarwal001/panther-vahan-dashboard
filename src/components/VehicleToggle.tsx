@@ -14,7 +14,7 @@ interface VehicleToggleProps {
 
 const VehicleToggle: Component<VehicleToggleProps> = (props) => {
   return (
-    <div class="flex flex-col gap-3 p-4">
+    <div class="flex flex-col gap-3 p-2">
       <label class="text-sm font-medium text-slate-700">Data Sources</label>
 
       <ToggleGroup
@@ -25,19 +25,31 @@ const VehicleToggle: Component<VehicleToggleProps> = (props) => {
       >
         <ToggleGroup.Item
           value={DataSource.Erickshaw}
-          class="flex items-center gap-2 px-4 py-2 text-sm font-medium border border-slate-300 rounded-md transition-all
-                 hover:bg-slate-50 outline-none focus-visible:ring-2 focus-visible:ring-blue-500
-                 data-[state=on]:bg-blue-50 data-[state=on]:border-blue-600 data-[state=on]:text-blue-700"
+          class="flex items-center gap-2 px-4 py-2 text-sm font-medium border rounded-md transition-all outline-none
+                 /* OFF State: Subtle border and gray text */
+                 border-slate-300 text-slate-600 bg-white hover:bg-slate-50
+
+                 /* ON State: Solid black background and white text */
+                 data-pressed:bg-slate-900 data-pressed:border-slate-900 data-pressed:text-white
+
+                 /* Focus Ring for accessibility */
+                 focus-visible:ring-2 focus-visible:ring-blue-500"
         >
-          <Zap size={16} />
+          <Zap size={16} class="transition-colors" />
           E-Rickshaw
         </ToggleGroup.Item>
 
         <ToggleGroup.Item
           value={DataSource.ThreeWheeler}
-          class="flex items-center gap-2 px-4 py-2 text-sm font-medium border border-slate-300 rounded-md transition-all
-                 hover:bg-slate-50 outline-none focus-visible:ring-2 focus-visible:ring-blue-500
-                 data-[state=on]:bg-blue-50 data-[state=on]:border-blue-600 data-[state=on]:text-blue-700"
+          class="flex items-center gap-2 px-4 py-2 text-sm font-medium border rounded-md transition-all outline-none
+                 /* OFF State: Subtle border and gray text */
+                 border-slate-300 text-slate-600 bg-white hover:bg-slate-50
+
+                 /* ON State: Solid black background and white text */
+                 data-pressed:bg-slate-900 data-pressed:border-slate-900 data-pressed:text-white
+
+                 /* Focus Ring for accessibility */
+                 focus-visible:ring-2 focus-visible:ring-blue-500"
         >
           <Truck size={16} />
           Three-Wheeler
