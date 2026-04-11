@@ -8,12 +8,15 @@ import {
   batch,
   createMemo,
 } from "solid-js";
+import { Portal } from "solid-js/web";
 import { Button } from "@kobalte/core/button";
+import { Toast } from "@kobalte/core/toast";
 import { Search } from "lucide-solid";
 
 import SelectWrapper, { type SelectOption } from "./components/SelectWrapper";
 import VehicleToggle, { DataSource } from "./components/VehicleToggle";
-import SalesTable, { type SalesRecord } from "./components/SalesTable";
+import SalesTable from "./components/SalesTable";
+import { showToast } from "./components/Toast";
 
 import { fetchStates, fetchRtos, fetchRecords } from "./resources";
 
@@ -67,31 +70,83 @@ const App: Component = () => {
     }),
   );
 
+  // Success/Error monitoring for RTOs
+  // 1. Monitor States (Initial Load Only)
+  createEffect(() => {
+    if (states.error) {
+      showToast({
+        title: "Error",
+        description: "Failed to fetch states.",
+        variant: "error",
+      });
+    }
+  });
+
+  // 2. Monitor RTOs specifically
+  createEffect(
+    on(
+      () => rtos.state,
+      (state) => {
+        if (rtos.error) {
+          showToast({
+            title: "Error",
+            description: "Failed to fetch RTO locations.",
+            variant: "error",
+          });
+        }
+        if (state === "ready" && Array.isArray(rtos())) {
+          showToast({
+            title: "RTOs Updated",
+            description: "Regional data is ready.",
+            variant: "success",
+          });
+        }
+      },
+    ),
+  );
+
+  // 3. Monitor Records specifically
+  createEffect(
+    on(
+      () => records.state,
+      (state) => {
+        if (records.error) {
+          showToast({
+            title: "Error",
+            description: "Failed to fetch sales records.",
+            variant: "error",
+          });
+        }
+        if (state === "ready" && Array.isArray(records())) {
+          showToast({
+            title: "Sales Data Retrieved",
+            description: "Sales data fetched successfully.",
+            variant: "success",
+          });
+        }
+      },
+    ),
+  );
+
   const handleSubmit = (e: Event) => {
     e.preventDefault();
-    if (!selectedStateId()) {
-      console.error(selectedStateId(), "state, not found");
-      return;
-    }
-    if (!selectedRtoId()) {
-      console.error(selectedRtoId(), "rto, not found");
-      return;
-    }
-    if (!selectedYearId()) {
-      console.error(selectedYearId(), "year, not found");
+    if (!selectedStateId() || !selectedRtoId() || !selectedYearId()) {
+      showToast({
+        title: "Selection Missing",
+        description: "Please fill all fields.",
+        variant: "error",
+      });
       return;
     }
     if (vehicleTypes().length <= 0) {
-      console.error("data source not found.");
+      showToast({
+        title: "One data source required.",
+        description: "Please select at least one data source.",
+        variant: "error",
+      });
       return;
     }
 
-    console.table({
-      state: selectedStateId()!,
-      rto: selectedRtoId()!,
-      year: selectedYearId()!,
-      types: vehicleTypes(),
-    });
     setParams({
       state: selectedStateId()!,
       rto: selectedRtoId()!,
@@ -169,6 +224,12 @@ const App: Component = () => {
       <Show when={!records.loading}>
         <SalesTable records={records() || []} />
       </Show>
+
+      <Portal>
+        <Toast.Region limit={5}>
+          <Toast.List class="fixed bottom-0 right-0 p-4 z-[100] flex flex-col gap-2 outline-none" />
+        </Toast.Region>
+      </Portal>
     </main>
   );
 };
