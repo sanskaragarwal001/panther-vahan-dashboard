@@ -21,13 +21,13 @@ import { showToast } from "./components/Toast";
 
 import { fetchStates, fetchRtos, fetchRecords } from "./resources";
 
-const years: SelectOption[] = [
-  { id: "selectedYear_1", value: "2026" },
-  { id: "selectedYear_2", value: "2025" },
-  { id: "selectedYear_3", value: "2024" },
-  { id: "selectedYear_4", value: "2023" },
-  { id: "selectedYear_5", value: "2022" },
-];
+const currentYear = new Date().getFullYear();
+
+const years: SelectOption[] = [];
+
+for (let i = 0; i <= 4; i++) {
+  years.push({ id: `selectedYear_${i + 1}`, value: String(currentYear - i) });
+}
 
 const App: Component = () => {
   // 1. Signals for selections
