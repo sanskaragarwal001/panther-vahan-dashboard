@@ -50,6 +50,13 @@ const App: Component = () => {
     types: DataSource[];
   } | null>(null);
 
+  const [submiteedState, setSubmittedState] = createSignal<
+    SelectOption | undefined
+  >(undefined);
+  const [submiteedRto, setSubmittedRto] = createSignal<
+    SelectOption | undefined
+  >(undefined);
+
   // 2. Fetch States on mount
   const [states] = createResource(fetchStates);
 
@@ -164,6 +171,11 @@ const App: Component = () => {
       year: selectedYearId()!,
       types: vehicleTypes(),
     });
+
+    batch(() => {
+      setSubmittedState(selectedStateId());
+      setSubmittedRto(selectedRtoId());
+    });
   };
 
   return (
@@ -187,7 +199,10 @@ const App: Component = () => {
 
           <div class="flex items-center gap-4">
             <Show when={recordOptions().length > 0}>
-              <DownloadSalesDialog data={recordOptions()} />
+              <DownloadSalesDialog
+                fileTitle={`${submiteedRto()?.value}, (${submiteedState()?.value})`}
+                data={recordOptions()}
+              />
             </Show>
           </div>
         </div>
@@ -274,7 +289,8 @@ const App: Component = () => {
               <div class="bg-[#111827] border border-slate-800 rounded-xl overflow-hidden shadow-xl">
                 <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
                   <h2 class="text-sm font-semibold text-slate-300">
-                    Detailed Sales Overview
+                    Maker list of {submiteedRto()?.value}, (
+                    {submiteedState()?.value})
                   </h2>
                   <span class="text-xs bg-blue-500/10 text-blue-400 px-2 py-1 rounded border border-blue-500/20">
                     {recordOptions().length} Entries Found

@@ -9,6 +9,7 @@ import { createExcelFileAndSaveIntoDisk } from "../utils";
 import type { SalesRecord } from "./SalesTable";
 
 interface DownloadDialogProps {
+  fileTitle: string;
   data: SalesRecord[];
 }
 
@@ -39,7 +40,7 @@ const DownloadSalesDialog = (props: DownloadDialogProps) => {
 
     // Trigger your provided function
     try {
-      createExcelFileAndSaveIntoDisk(props.data, monthValue);
+      createExcelFileAndSaveIntoDisk(props.data, monthValue, props.fileTitle);
       setIsOpen(false);
     } catch (err) {
       console.error("Export failed", err);

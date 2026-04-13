@@ -94,11 +94,12 @@ const schema = [
 export async function createExcelFileAndSaveIntoDisk(
   sales: SalesRecord[],
   col: Exclude<keyof SalesRecord, "sno" | "maker"> = "total",
+  fileTitle: string,
 ) {
   const sortedSales = [...sales].sort((a, b) => b[col] - a[col]);
 
   await writeExcelFile(sortedSales, {
     schema,
-    fileName: "sales-report.xlsx",
+    fileName: fileTitle ? `${fileTitle}.xlsx` : "sales-report.xlsx",
   });
 }
