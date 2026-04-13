@@ -1,7 +1,7 @@
 import type { Component, Accessor, Setter } from "solid-js";
 import { splitProps } from "solid-js";
 import { Select } from "@kobalte/core/select";
-import { Check, ChevronsUpDown } from "lucide-solid";
+import { Check, ChevronDown } from "lucide-solid";
 
 export interface SelectOption {
   id: string;
@@ -25,7 +25,7 @@ const SelectWrapper: Component<SelectWrapperProps> = (props) => {
   }
 
   return (
-    <div class="flex flex-col gap-2 w-full max-w-[240px]">
+    <div class="flex flex-col gap-2 w-full">
       <Select
         required
         value={props.value()}
@@ -37,31 +37,46 @@ const SelectWrapper: Component<SelectWrapperProps> = (props) => {
         itemComponent={(props) => (
           <Select.Item
             item={props.item}
-            class="flex items-center justify-between px-3 py-2 text-sm text-slate-700 cursor-default outline-none rounded-sm data-[highlighted]:bg-slate-100 data-[selected]:text-blue-600 transition-colors"
+            class="flex items-center justify-between px-3 py-2.5 text-sm text-slate-300 cursor-pointer outline-none rounded-lg
+                       data-[highlighted]:bg-blue-600/20 data-[highlighted]:text-blue-100 data-[selected]:text-blue-400 transition-all"
           >
-            <Select.ItemLabel>{props.item.rawValue.value}</Select.ItemLabel>
+            {/* Fix: truncate long values in the dropdown list */}
+            <Select.ItemLabel class="truncate mr-2">
+              {props.item.rawValue.value}
+            </Select.ItemLabel>
             <Select.ItemIndicator>
-              <Check size={16} class="text-blue-600" />
+              <Check size={14} class="text-blue-400 stroke-[3]" />
             </Select.ItemIndicator>
           </Select.Item>
         )}
       >
-        <Select.Label class="text-sm font-medium text-slate-700">
+        <Select.Label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">
           {local.label}
         </Select.Label>
 
-        <Select.Trigger class="flex items-center justify-between w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-md shadow-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
-          <Select.Value<SelectOption>>
-            {(state) => state.selectedOption()?.value || local.placeholder}
-          </Select.Value>
-          <Select.Icon class="flex items-center">
-            <ChevronsUpDown size={16} class="text-slate-400" />
+        <Select.Trigger
+          class="flex items-center justify-between w-full px-4 py-2.5 text-sm bg-[#0B0F1A] border border-slate-800 rounded-xl shadow-inner outline-none
+                     hover:border-slate-700 focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all group"
+        >
+          {/* Fix: truncate the selected value in the trigger button */}
+          <div class="truncate text-left w-full text-slate-200 font-medium">
+            <Select.Value<SelectOption>>
+              {(state) =>
+                state.selectedOption()?.value || (
+                  <span class="text-slate-500">{local.placeholder}</span>
+                )
+              }
+            </Select.Value>
+          </div>
+
+          <Select.Icon class="flex items-center ml-2 transition-transform group-aria-expanded:rotate-180">
+            <ChevronDown size={16} class="text-slate-500" />
           </Select.Icon>
         </Select.Trigger>
 
         <Select.Portal>
-          <Select.Content class="z-50 min-w-[var(--kb-select-content-width)] bg-white border border-slate-200 rounded-md shadow-lg animate-in fade-in zoom-in-95 duration-100">
-            <Select.Listbox class="p-1 max-h-60 overflow-y-auto focus:outline-none" />
+          <Select.Content class="z-50 min-w-[var(--kb-select-content-width)] bg-[#111827] border border-slate-800 rounded-xl shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200">
+            <Select.Listbox class="p-1.5 max-h-72 overflow-y-auto focus:outline-none scrollbar-thin scrollbar-thumb-slate-800" />
           </Select.Content>
         </Select.Portal>
       </Select>

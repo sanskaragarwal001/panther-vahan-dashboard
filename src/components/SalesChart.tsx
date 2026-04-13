@@ -9,7 +9,24 @@ import {
   AxisTooltip,
   AxisCursor,
 } from "solid-charts";
+import { TrendingUp } from "lucide-solid";
 import { type SalesRecord } from "./SalesTable";
+
+const months: Record<string, string> = {
+  jan: "January",
+  feb: "February",
+  mar: "March",
+  apr: "April",
+  may: "May",
+  jun: "June",
+  jul: "July",
+  aug: "August",
+  sep: "September",
+  oct: "October",
+  nov: "November",
+  dec: "December",
+  total: "Total",
+};
 
 interface TopChartProps {
   records: SalesRecord[];
@@ -27,39 +44,75 @@ const SalesBarChart: Component<TopChartProps> = (props) => {
   });
 
   return (
-    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm w-full">
-      {/* Wrapper to control dimensions for the responsive SVG */}
-      <div class="h-100 w-full text-sm">
+    <div class="bg-[#111827] p-6 rounded-2xl border border-slate-800 shadow-2xl w-full relative overflow-hidden group">
+      {/* Background Decorative Element */}
+      <div class="absolute top-0 right-0 p-8 opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity">
+        <TrendingUp size={120} class="text-blue-500" />
+      </div>
+
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h2 class="text-sm font-bold text-slate-200 uppercase tracking-widest">
+            Top 10 Manufacturers
+          </h2>
+          <p class="text-xs text-slate-500 mt-1">
+            Performance breakdown for{" "}
+            <span class="text-blue-400 font-semibold">
+              {months[props.activeMonth]}
+            </span>
+          </p>
+        </div>
+        <div class="px-3 py-1 bg-blue-500/10 border border-blue-500/20 rounded-full">
+          <span class="text-[10px] font-bold text-blue-400 uppercase">
+            Live Data
+          </span>
+        </div>
+      </div>
+
+      <div class="h-80 w-full text-[10px] font-medium">
         <Chart data={top10Data()}>
-          {/* Y-Axis: No dataKey needed for the value axis, just position */}
+          {/* SVG Gradients Definition */}
+          <defs>
+            <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.8" />
+              <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.1" />
+            </linearGradient>
+          </defs>
+
           <Axis axis="y" position="left" tickCount={5}>
-            <AxisLabel />
-            <AxisGrid class="stroke-slate-200 stroke-dasharray-4" />
+            <AxisLabel class="fill-slate-500 font-mono" />
+            <AxisGrid class="stroke-slate-800/50 stroke-dasharray-4" />
           </Axis>
 
-          {/* X-Axis: Maps to the 'name' property in our data array */}
           <Axis dataKey="name" axis="x" position="bottom">
-            {/*<AxisLabel />*/}
-            <AxisLine class="stroke-slate-300" />
-            <AxisCursor />
+            <AxisLine class="stroke-slate-800" />
+            <AxisCursor class="stroke-blue-500/20" />
 
-            {/* Tooltip passes the active data point as a prop to its children */}
             <AxisTooltip>
               {(tooltipProps) => (
-                <div class="bg-slate-900 text-white px-3 py-2 rounded text-sm shadow-xl flex flex-col gap-1">
-                  <span class="font-bold text-xs text-slate-300">
+                <div class="bg-[#0B0F1A]/90 backdrop-blur-xl border border-blue-500/30 text-white px-4 py-3 rounded-xl shadow-2xl flex flex-col gap-1 min-w-[140px] animate-in fade-in zoom-in-95">
+                  <span class="text-[10px] font-black text-blue-400 uppercase tracking-tighter">
+                    Manufacturer
+                  </span>
+                  <span class="font-bold text-sm border-b border-slate-800 pb-1 mb-1 truncate">
                     {tooltipProps.data.name}
                   </span>
-                  <span>Sales: {tooltipProps.data.sales}</span>
+                  <div class="flex justify-between items-center">
+                    <span class="text-slate-400">Total Sales</span>
+                    <span class="text-blue-400 font-mono font-bold">
+                      {tooltipProps.data.sales.toLocaleString()}
+                    </span>
+                  </div>
                 </div>
               )}
             </AxisTooltip>
           </Axis>
 
-          {/* The Bar component maps to the 'sales' property */}
           <Bar
             dataKey="sales"
-            class="fill-blue-500 hover:fill-blue-600 transition-colors"
+            style={{ fill: "url(#barGradient)" }}
+            class="hover:opacity-100 opacity-80 transition-all cursor-pointer stroke-blue-500/40 stroke-1"
+            rx={4}
           />
         </Chart>
       </div>

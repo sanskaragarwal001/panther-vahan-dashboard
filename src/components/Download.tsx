@@ -2,7 +2,7 @@ import { createSignal, For } from "solid-js";
 
 import { Dialog } from "@kobalte/core/dialog";
 import { Button } from "@kobalte/core/button";
-import { X, Download, FileSpreadsheet } from "lucide-solid";
+import { X, Download, FileSpreadsheet, FileDown } from "lucide-solid";
 
 import SelectWrapper, { type SelectOption } from "./SelectWrapper";
 import { createExcelFileAndSaveIntoDisk } from "../utils";
@@ -49,51 +49,71 @@ const DownloadSalesDialog = (props: DownloadDialogProps) => {
   return (
     <Dialog open={isOpen()} onOpenChange={setIsOpen}>
       <Dialog.Trigger>
-        <Button class="flex items-center gap-2 px-5 py-2.5 bg-[#1D6F42] hover:bg-[#155231] text-white font-semibold rounded-lg shadow-md shadow-green-100 transition-all active:scale-95 outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 border border-green-700/20">
-          <FileSpreadsheet size={18} class="text-green-50" />
-          <span>Export Excel</span>
+        <Button class="flex items-center gap-2 px-5 py-2.5 bg-emerald-600/10 hover:bg-emerald-600/20 text-emerald-400 font-bold rounded-xl border border-emerald-500/20 transition-all active:scale-95 outline-none focus:ring-2 focus:ring-emerald-500/40 shadow-lg shadow-emerald-950/20 group">
+          <FileDown
+            size={18}
+            class="group-hover:translate-y-0.5 transition-transform"
+          />
+          <span class="text-sm">Export Dataset</span>
         </Button>
       </Dialog.Trigger>
+
       <Dialog.Portal>
-        <Dialog.Overlay class="fixed inset-0 z-50 bg-slate-900/20 backdrop-blur-sm animate-in fade-in" />
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <Dialog.Content class="w-full max-w-md bg-white rounded-xl shadow-2xl border border-slate-200 p-6 animate-in zoom-in-95">
-            <div class="flex items-center justify-between mb-6">
-              <Dialog.Title class="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <FileSpreadsheet class="text-green-600" size={20} />
-                Export Sales Data
-              </Dialog.Title>
-              <Dialog.CloseButton class="text-slate-400 hover:text-slate-600">
+        {/* Darkened Overlay with heavy blur */}
+        <Dialog.Overlay class="fixed inset-0 z-10 bg-[#020617]/80 backdrop-blur-md animate-in fade-in duration-300" />
+
+        <div class="fixed inset-0 z-20 flex items-center justify-center p-4">
+          <Dialog.Content class="w-full max-w-md bg-[#0B0F1A] rounded-2xl shadow-2xl border border-slate-800 p-8 animate-in zoom-in-95 duration-200">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-3">
+                <div class="p-2 bg-emerald-500/10 rounded-lg">
+                  <FileSpreadsheet class="text-emerald-500" size={24} />
+                </div>
+                <Dialog.Title class="text-xl font-bold text-slate-100">
+                  Export Data
+                </Dialog.Title>
+              </div>
+              <Dialog.CloseButton class="p-2 text-slate-500 hover:text-white hover:bg-white/5 rounded-lg transition-all">
                 <X size={20} />
               </Dialog.CloseButton>
             </div>
 
-            <Dialog.Description class="text-sm text-slate-500 mb-6">
-              Select the specific month to filter and sort the records for the
-              Excel export.
+            <Dialog.Description class="text-sm text-slate-400 mb-8 leading-relaxed">
+              Generate a regional sales report in XLSX format. Choose a specific
+              month to apply localized filtering.
             </Dialog.Description>
 
-            <div class="space-y-6">
-              <SelectWrapper
-                label="Select Month"
-                options={months}
-                value={selectedMonth}
-                setValue={setSelectedMonth}
-                placeholder="Choose month..."
-              />
+            <div class="space-y-8">
+              <div class="bg-[#111827] p-4 rounded-xl border border-slate-800/50">
+                <SelectWrapper
+                  label="Reference Period"
+                  options={months}
+                  value={selectedMonth}
+                  setValue={setSelectedMonth}
+                  placeholder="Select export month..."
+                />
+              </div>
 
-              <div class="flex justify-end gap-3 pt-2">
-                <Dialog.CloseButton class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">
-                  Cancel
-                </Dialog.CloseButton>
+              <div class="flex flex-col gap-3">
                 <button
                   onClick={handleDownload}
-                  class="flex items-center gap-2 px-6 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg shadow-md transition-all active:scale-95"
+                  class="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-900/20 transition-all active:scale-[0.98]"
                 >
-                  <Download size={16} />
-                  Download Excel
+                  <Download size={18} />
+                  Download Excel Report
                 </button>
+
+                <Dialog.CloseButton class="w-full py-3 text-sm font-semibold text-slate-500 hover:text-slate-300 transition-colors">
+                  Discard Changes
+                </Dialog.CloseButton>
               </div>
+            </div>
+
+            {/* Subtle Footer Brand */}
+            <div class="mt-8 pt-6 border-t border-slate-800/50 flex justify-center">
+              <p class="text-[10px] font-black text-slate-700 uppercase tracking-[0.2em]">
+                Panther Vahan Internal System
+              </p>
             </div>
           </Dialog.Content>
         </div>

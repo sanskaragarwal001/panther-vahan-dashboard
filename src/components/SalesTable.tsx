@@ -15,6 +15,7 @@ import {
   ChevronUp,
   ChevronLeft,
   ChevronRight,
+  TrendingUp,
 } from "lucide-solid";
 
 import SalesBarChart from "./SalesChart";
@@ -96,45 +97,59 @@ const SalesTable: Component<SalesTableProps> = (props) => {
   );
 
   return (
-    <div class="bg-white max-w-[1440px] mx-auto rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-      <Show when={sortedFullData().length}>
-        <SalesBarChart
-          records={sortedFullData()}
-          activeMonth={sortConfig().key}
-        />
-      </Show>
-      <div class="p-4 border-b border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
-        <h2 class="text-lg font-semibold text-slate-800">
-          Maker-wise Sales Report
-        </h2>
-        <div class="relative w-full md:w-72">
+    <div class="bg-[#0F172A] max-w-[1440px] mx-auto rounded-2xl shadow-2xl border border-slate-800/60 overflow-hidden flex flex-col mb-12">
+      {/* 1. Header & Integrated Chart */}
+      <div class="p-1 bg-gradient-to-b from-slate-800/30 to-transparent">
+        <Show when={sortedFullData().length}>
+          <SalesBarChart
+            records={sortedFullData()}
+            activeMonth={sortConfig().key}
+          />
+        </Show>
+      </div>
+
+      {/* 2. Controls Toolbar */}
+      <div class="px-6 py-5 flex flex-col md:flex-row justify-between items-center gap-4 bg-[#111827]/50 border-y border-slate-800/50">
+        <div class="flex items-center gap-3">
+          <div class="p-2 bg-blue-500/10 rounded-lg">
+            <TrendingUp size={20} class="text-blue-400" />
+          </div>
+          <h2 class="text-sm font-bold text-slate-200 uppercase tracking-widest">
+            Manufacturer Performance Index
+          </h2>
+        </div>
+
+        <div class="relative w-full md:w-80 group">
           <Search
-            size={18}
-            class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+            size={16}
+            class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-400 transition-colors"
           />
           <input
             type="text"
-            placeholder="Search maker..."
-            class="w-full pl-10 pr-4 py-2 text-sm border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            placeholder="Search by manufacturer..."
+            class="w-full pl-10 pr-4 py-2.5 bg-[#0B0F1A] border border-slate-800 text-slate-200 text-sm rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-600"
             onInput={(e) => setSearch(e.currentTarget.value)}
           />
         </div>
       </div>
 
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
+      {/* 3. The Modern Data Grid */}
+      <div class="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent">
+        <table class="w-full text-left border-separate border-spacing-0">
           <thead>
-            <tr class="bg-slate-50 border-b border-slate-200 text-xs uppercase text-slate-500 font-semibold">
-              <th class="px-4 py-3">S.No</th>
-              <th class="px-4 py-3 min-w-[200px]">Maker</th>
+            <tr class="bg-[#0B0F1A] sticky top-0 z-10 border-b border-slate-800 text-[10px] uppercase text-slate-500 font-black tracking-tighter">
+              <th class="px-6 py-4 border-b border-slate-800">#</th>
+              <th class="px-6 py-4 border-b border-slate-800 min-w-[220px]">
+                Maker Name
+              </th>
 
               <For each={months}>
                 {(month) => (
                   <th
-                    class="px-3 py-3 text-center cursor-pointer hover:bg-slate-100 transition-colors select-none"
-                    onClick={() => handleSort(month)}
+                    class="px-4 py-4 text-center border-b border-slate-800 cursor-pointer hover:text-blue-400 transition-colors select-none group"
+                    onClick={() => handleSort(month as any)}
                   >
-                    <div class="flex items-center justify-center gap-1">
+                    <div class="flex items-center justify-center gap-1.5">
                       {month}
                       <SortIcon
                         config={sortConfig()}
@@ -146,17 +161,18 @@ const SalesTable: Component<SalesTableProps> = (props) => {
               </For>
 
               <th
-                class="px-4 py-3 text-right cursor-pointer hover:bg-slate-100 transition-colors select-none"
+                class="px-6 py-4 text-right border-b border-slate-800 cursor-pointer hover:text-blue-400 transition-colors select-none"
                 onClick={() => handleSort("total")}
               >
-                <div class="flex items-center justify-end gap-1">
-                  Total
+                <div class="flex items-center justify-end gap-1.5">
+                  Total Units
                   <SortIcon config={sortConfig()} column="total" />
                 </div>
               </th>
             </tr>
           </thead>
-          <tbody class="text-sm text-slate-700">
+
+          <tbody class="text-sm text-slate-300 divide-y divide-slate-800/40">
             <For each={paginationData()}>
               {(row) => {
                 const currentSNo = createMemo(
@@ -164,30 +180,34 @@ const SalesTable: Component<SalesTableProps> = (props) => {
                 );
 
                 return (
-                  <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
-                    <td class="px-4 py-4 text-slate-400">{currentSNo()}</td>
-                    <td class="px-4 py-4 font-medium">
+                  <tr class="hover:bg-blue-500/[0.02] transition-colors group">
+                    <td class="px-6 py-4 font-mono text-xs text-slate-600">
+                      {currentSNo().toString().padStart(2, "0")}
+                    </td>
+                    <td class="px-6 py-4">
                       <Tooltip>
-                        <Tooltip.Trigger class="text-left max-w-[180px] truncate block hover:text-blue-600 transition-colors cursor-help">
+                        <Tooltip.Trigger class="text-left font-semibold text-slate-200 hover:text-blue-400 transition-colors cursor-help truncate block max-w-[200px]">
                           {row.maker}
                         </Tooltip.Trigger>
                         <Tooltip.Portal>
-                          <Tooltip.Content class="z-50 bg-slate-900 text-white px-3 py-1.5 text-xs rounded shadow-lg">
-                            <Tooltip.Arrow />
+                          <Tooltip.Content class="z-[60] bg-[#111827] border border-slate-700 text-blue-50 px-3 py-2 text-xs rounded-lg shadow-2xl animate-in fade-in zoom-in-95">
+                            <Tooltip.Arrow class="fill-[#111827]" />
                             {row.maker}
                           </Tooltip.Content>
                         </Tooltip.Portal>
                       </Tooltip>
                     </td>
+
                     <For each={months}>
                       {(month) => (
-                        <td class="px-3 py-4 text-center tabular-nums">
-                          {row[month.toLowerCase() as keyof SalesRecord] || 0}
+                        <td class="px-4 py-4 text-center tabular-nums font-mono text-xs group-hover:text-white transition-colors">
+                          {row[month.toLowerCase() as keyof SalesRecord] || "—"}
                         </td>
                       )}
                     </For>
-                    <td class="px-4 py-4 text-right font-bold text-slate-900 tabular-nums">
-                      {row.total}
+
+                    <td class="px-6 py-4 text-right tabular-nums font-bold text-blue-400 bg-blue-500/[0.01]">
+                      {row.total.toLocaleString()}
                     </td>
                   </tr>
                 );
@@ -197,28 +217,33 @@ const SalesTable: Component<SalesTableProps> = (props) => {
         </table>
       </div>
 
-      {/* Pagination Footer */}
-      <div class="p-4 border-t border-slate-100 flex justify-center bg-slate-50/50">
+      {/* 4. Glass-morphism Pagination */}
+      <div class="p-6 border-t border-slate-800/50 flex flex-col md:flex-row items-center justify-between bg-[#0B0F1A] gap-4">
+        <span class="text-xs text-slate-500 font-medium">
+          Showing page <span class="text-slate-300">{page()}</span> of{" "}
+          {totalPages()}
+        </span>
+
         <Pagination
           count={totalPages()}
           page={page()}
           onPageChange={setPage}
-          itemComponent={(props) => (
+          itemComponent={(p) => (
             <Pagination.Item
-              page={props.page}
-              class="px-3 py-1 text-sm rounded-md border border-slate-200 bg-white hover:bg-slate-50 data-[current]:bg-blue-600 data-[current]:text-white data-[current]:border-blue-600 transition-colors"
+              page={p.page}
+              class="min-w-[36px] h-9 text-xs font-bold rounded-lg border border-slate-800 bg-[#111827] text-slate-400 hover:border-slate-600 hover:text-white data-[current]:bg-blue-600 data-[current]:text-white data-[current]:border-blue-600 data-[current]:shadow-[0_0_15px_rgba(37,99,235,0.3)] transition-all"
             >
-              {props.page}
+              {p.page}
             </Pagination.Item>
           )}
-          ellipsisComponent={() => <span class="px-2 text-slate-400">...</span>}
+          ellipsisComponent={() => <span class="px-2 text-slate-600">•••</span>}
         >
           <div class="flex items-center gap-2">
-            <Pagination.Previous class="p-2 rounded-md border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed">
+            <Pagination.Previous class="h-9 w-9 flex items-center justify-center rounded-lg border border-slate-800 bg-[#111827] text-slate-400 hover:bg-slate-800 disabled:opacity-20 disabled:cursor-not-allowed transition-colors">
               <ChevronLeft size={16} />
             </Pagination.Previous>
             <Pagination.Items />
-            <Pagination.Next class="p-2 rounded-md border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed">
+            <Pagination.Next class="h-9 w-9 flex items-center justify-center rounded-lg border border-slate-800 bg-[#111827] text-slate-400 hover:bg-slate-800 disabled:opacity-20 disabled:cursor-not-allowed transition-colors">
               <ChevronRight size={16} />
             </Pagination.Next>
           </div>
